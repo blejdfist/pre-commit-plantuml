@@ -1,0 +1,6 @@
+- id: plantuml-generate-svg
+  name: generate svg from plantuml
+  description: Generate SVG files for all PlantUML files
+  entry: plantuml-generate-svg
+  language: python
+  files: \.(puml)$
