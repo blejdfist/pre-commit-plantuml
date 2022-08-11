@@ -1,7 +1,9 @@
 import os
 import hashlib
 import tempfile
+import functools
 import subprocess
+import multiprocessing
 from pathlib import Path
 from urllib.request import urlretrieve
 from argparse import ArgumentParser
@@ -50,8 +52,8 @@ def download_plantuml():
 
 
 def run_plantuml(jar_file, *args):
-    proc = subprocess.run(["java", "-jar", jar_file, "-progress", "-nometadata"] + list(args))
-    return proc.returncode
+    proc = subprocess.run(["java", "-jar", jar_file, "-nometadata"] + list(args))
+    return proc.returncode == 0
 
 
 def generate_svg():
@@ -71,5 +73,8 @@ def generate_svg():
         # Nothing to generate
         return 0
 
-    return run_plantuml(plantuml_jar, "-tsvg", *puml_files)
+    plantuml = functools.partial(run_plantuml, plantuml_jar, "-tsvg")
 
+    with multiprocessing.Pool() as pool:
+        results = pool.map(plantuml, puml_files)
+        return 0 if all(results) else 1
